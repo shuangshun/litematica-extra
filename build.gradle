@@ -1,0 +1,116 @@
+plugins {
+	id "net.fabricmc.fabric-loom-remap" version "${loom_version}"
+	id "maven-publish"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	maven {
+		url = "https://masa.dy.fi/maven/"
+		content { includeGroupAndSubgroups("fi.dy.masa") }
+	}
+
+	maven {
+		url = "https://cursemaven.com"
+		content { includeGroup("curse.maven") }
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
+	modImplementation("curse.maven:litematica-${litematica_project_id}:${litematica_file_id}")
+
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 17
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+import org.gradle.internal.os.OperatingSystem
+
+ext {
+	nativeOutputDir = file("${buildDir}/generated/native")
+	nativeLibName = "Litematic_V7_To_V6_DynamicLibrary"
+}
+def os = OperatingSystem.current()
+
+tasks.register("buildNativeLibrary", Exec) {
+	description = "Build native library"
+	group = "litematica-extra"
+
+	workingDir "${rootDir}/native/"
+
+	if (os.isWindows()) {
+		commandLine "cmd", "/c", "cmake-build.bat"
+	} else {
+		commandLine "bash", "cmake-build.sh"
+	}
+}
+
+tasks.register("copyNativeLibrary", Copy) {
+	description = "Copy built native library to resources for packaging"
+	group = "litematica-extra"
+
+	dependsOn "buildNativeLibrary"
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+	from("${rootDir}/native/build/Litematic_V7_To_V6_DynamicLibrary") {
+		if (os.isWindows()) {
+			include "${nativeLibName}.dll"
+		} else if (os.isMacOsX()) {
+			include "lib${nativeLibName}.dylib"
+		} else {
+			include "lib${nativeLibName}.so"
+		}
+	}
+	into nativeOutputDir
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+
+	dependsOn "copyNativeLibrary"
+	from(nativeOutputDir) {
+		into "native"
+	}
+}
+
+jar {
+	inputs.property "archivesName", project.base.archivesName
+
+	from("LICENSE") {
+		rename { "${it}_${inputs.properties.archivesName}"}
+	}
+
+	dependsOn "copyNativeLibrary"
+	from(nativeOutputDir) {
+		into "native"
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
+}

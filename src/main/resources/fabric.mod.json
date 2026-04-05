@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "litematica-extra",
+	"version": "${version}",
+	"name": "Litematica Extra",
+	"description": "Litematica extra",
+	"authors": [
+		"shuangshun",
+		"chenjunfu2"
+	],
+	"contact": {
+		"homepage": "https://github.com/shuangshun/litematica-extra",
+		"sources": "https://github.com/shuangshun/litematica-extra"
+	},
+	"license": "LGPL-3.0",
+	"icon": "assets/litematica-extra/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"dev.shun.litematica.extra.LitematicaExtra"
+		]
+	},
+	"mixins": [
+		"litematica-extra.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
