@@ -1,0 +1,3 @@
+[submodule "native"]
+	path = native
+	url = https://github.com/chenjunfu2/Litematic_V7_To_V6_DynamicLibrary.git
