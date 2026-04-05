@@ -27,7 +27,7 @@ A Litematica extension that adds various fixes and features
 
 ```bash
 git clone https://github.com/shuangshun/litematica-extra.git
-cd litematica-extra-1.20.1
+cd litematica-extra
 
 git submodule update --init --recursive
 
