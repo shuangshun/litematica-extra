@@ -5,6 +5,7 @@ import net.minecraft.nbt.NbtCompound;
 import java.util.*;
 
 public class NbtScanResult {
+
     private final Map<String, Integer> intValues = new HashMap<>();
     private final Map<String, NbtCompound> compoundValues = new HashMap<>();
 

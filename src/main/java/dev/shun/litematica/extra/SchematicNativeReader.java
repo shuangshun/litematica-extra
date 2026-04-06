@@ -24,13 +24,8 @@ public class SchematicNativeReader {
             }
 
             byte[] rawNbt = decompressGzip(compressedInput);
-            byte[] convertedRaw = V7_To_V6(rawNbt);
 
-            if (convertedRaw == null) {
-                return null;
-            }
-
-            return convertedRaw;
+            return V7_To_V6(rawNbt);
 
         } catch (Exception e) {
             LOGGER.error("Schematic conversion failed", e);
@@ -58,9 +53,9 @@ public class SchematicNativeReader {
              GZIPInputStream gis = new GZIPInputStream(bis);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()
         ) {
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[8192];
             int len;
-            while ((len = gis.read(buffer)) > 0) {
+            while ((len = gis.read(buffer)) != -1) {
                 bos.write(buffer, 0, len);
             }
             return bos.toByteArray();

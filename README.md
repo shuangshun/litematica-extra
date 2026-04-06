@@ -26,10 +26,8 @@ A Litematica extension that adds various fixes and features
 ## Building
 
 ```bash
-git clone https://github.com/shuangshun/litematica-extra.git
+git clone --recurse-submodules https://github.com/shuangshun/litematica-extra.git
 cd litematica-extra
-
-git submodule update --init --recursive
 
 ./gradlew build
 ```
