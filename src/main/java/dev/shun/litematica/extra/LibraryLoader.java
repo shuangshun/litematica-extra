@@ -2,14 +2,13 @@ package dev.shun.litematica.extra;
 
 import net.fabricmc.loader.api.FabricLoader;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
 import java.nio.file.*;
+import java.security.*;
 
 public class LibraryLoader {
-    private static final Logger LOGGER = LogManager.getLogger(LitematicaExtra.MOD_NAME + "/LibraryLoader");
 
     private static boolean loaded = false;
     private static final String LIBRARY_NAME = "Litematic_V7_To_V6_DynamicLibrary";
@@ -46,33 +45,68 @@ public class LibraryLoader {
                 throw new FileNotFoundException("Native library not found in resources: " + resourcePath);
             }
 
-            if (!libFile.exists()) {
-                LOGGER.debug("Extracting {} to {}", resourcePath, libFile.getAbsolutePath());
+            byte[] expectedHash = calculateHash(is);
 
-                File tempFile = File.createTempFile(libFileName, ".tmp", tempDir.toFile());
-                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = is.read(buffer)) != -1) {
-                        fos.write(buffer, 0, len);
-                    }
+            boolean needExtract = true;
+            if (libFile.exists()) {
+                byte[] existingHash;
+                try (FileInputStream fis = new FileInputStream(libFile)) {
+                    existingHash = calculateHash(fis);
                 }
 
-                Files.move(tempFile.toPath(), libFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
+                if (MessageDigest.isEqual(expectedHash, existingHash)) {
+                    needExtract = false;
+                    LOGGER.debug("Native library already exists and hash matches: {}", libFile.getAbsolutePath());
+                } else {
+                    LOGGER.debug("Native library hash mismatch, re-extracting: {}", libFile.getAbsolutePath());
+                }
+            }
 
-                // Linux/macOS
-                String osName = System.getProperty("os.name").toLowerCase();
-                if (!osName.contains("win")) {
-                    if (!libFile.setExecutable(true)) {
-                        LOGGER.warn("Failed to set executable permission for {}", libFile.getAbsolutePath());
+            if (needExtract) {
+                LOGGER.debug("Extracting {} to {}", resourcePath, libFile.getAbsolutePath());
+
+                try (InputStream resourceIs = LibraryLoader.class.getClassLoader().getResourceAsStream(resourcePath)) {
+                    if (resourceIs == null) {
+                        throw new FileNotFoundException("Native library not found in resources: " + resourcePath);
+                    }
+
+                    File tempFile = File.createTempFile(libFileName, ".tmp", tempDir.toFile());
+                    try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = resourceIs.read(buffer)) > -1) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
+
+                    Files.move(tempFile.toPath(), libFile.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.ATOMIC_MOVE);
+
+                    // Linux/macOS
+                    String osName = System.getProperty("os.name").toLowerCase();
+                    if (!osName.contains("win")) {
+                        if (!libFile.setExecutable(true)) {
+                            LOGGER.warn("Failed to set executable permission for {}", libFile.getAbsolutePath());
+                        }
                     }
                 }
             }
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException("Hash algorithm not available", e);
         }
 
         return libFile;
+    }
+
+    private static byte[] calculateHash(InputStream is) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] buffer = new byte[8192];
+        int len;
+        while ((len = is.read(buffer)) != -1) {
+            md.update(buffer, 0, len);
+        }
+        return md.digest();
     }
 
 //    public static boolean isLoaded() {
