@@ -1,7 +1,8 @@
 package dev.shun.litematica.extra;
 
-import dev.shun.litematica.extra.nbt.*;
+import net.minecraft.util.FixedBufferInputStream;
 
+import dev.shun.litematica.extra.nbt.*;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.util.zip.*;
@@ -17,13 +18,12 @@ public class SchematicNativeReader {
         }
 
         try {
-            Integer version = readVersion(compressedInput);
-
-            if (version != null && version <= 6) {
-                return compressedInput;
-            }
-
             byte[] rawNbt = decompressGzip(compressedInput);
+
+            Integer version = readVersion(rawNbt);
+            if (version != null && version <= 6) {
+                return rawNbt;
+            }
 
             return V7_To_V6(rawNbt);
 
@@ -35,11 +35,11 @@ public class SchematicNativeReader {
 
     private static Integer readVersion(byte[] data) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
-             GZIPInputStream gis = new GZIPInputStream(bis)
+             FixedBufferInputStream fbis = new FixedBufferInputStream(bis)
         ) {
 
-            NbtStreamReader reader = new NbtStreamReader(gis);
-            NbtScanResult result = reader.scanRootFields("Version");
+            NbtStreamScanner scanner = new NbtStreamScanner(fbis);
+            NbtScanResult result = scanner.scan("Version");
 
             return result.getInt("Version");
 
@@ -51,11 +51,12 @@ public class SchematicNativeReader {
     private static byte[] decompressGzip(byte[] data) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
              GZIPInputStream gis = new GZIPInputStream(bis);
+             FixedBufferInputStream fbis = new FixedBufferInputStream(gis);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()
         ) {
             byte[] buffer = new byte[8192];
             int len;
-            while ((len = gis.read(buffer)) != -1) {
+            while ((len = fbis.read(buffer)) != -1) {
                 bos.write(buffer, 0, len);
             }
             return bos.toByteArray();

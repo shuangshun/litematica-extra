@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.nbt.*;
+import net.minecraft.util.FixedBufferInputStream;
 import fi.dy.masa.litematica.schematic.SchematicMetadata;
 import fi.dy.masa.litematica.schematic.LitematicaSchematic;
 import dev.shun.litematica.extra.nbt.*;
@@ -34,14 +35,7 @@ public abstract class LitematicaSchematicMixin {
             byte[] processedData = SchematicNativeReader.convertSchematicIfNeeded(compressedData);
 
             if (processedData != null) {
-                NbtCompound nbt;
-
-                if (processedData == compressedData) {
-                    nbt = NbtIo.readCompressed(new ByteArrayInputStream(processedData));
-                } else {
-                    nbt = NbtIo.read(new DataInputStream(new ByteArrayInputStream(processedData)));
-                }
-
+                NbtCompound nbt = NbtIo.read(new DataInputStream(new ByteArrayInputStream(processedData)));
                 cir.setReturnValue(nbt);
                 cir.cancel();
             }
@@ -64,10 +58,11 @@ public abstract class LitematicaSchematicMixin {
         }
 
         try (FileInputStream fis = new FileInputStream(file);
-             GZIPInputStream gis = new GZIPInputStream(fis)
+             GZIPInputStream gis = new GZIPInputStream(fis);
+             FixedBufferInputStream fbis = new FixedBufferInputStream(gis)
         ) {
-            NbtStreamReader reader = new NbtStreamReader(gis);
-            NbtScanResult result = reader.scanRootFields("Version", "Metadata");
+            NbtStreamScanner scanner = new NbtStreamScanner(fbis);
+            NbtScanResult result = scanner.scan("Version", "Metadata");
 
             Integer version = result.getInt("Version");
             if (version == null || version < 1) {
