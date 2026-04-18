@@ -15,7 +15,7 @@
   },
   "license": "LGPL-3.0",
 
-  "icon": "icon.png",
+  "icon": "assets/litematica-extra/icon.png",
 
   "environment": "client",
   "entrypoints": {
