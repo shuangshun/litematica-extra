@@ -1,15 +1,18 @@
 {
   "required": true,
+  "minVersion": "0.8",
   "package": "dev.shun.litematica.extra.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
   "mixins": [
     "LitematicaSchematicMixin",
     "TaskPasteSchematicPerChunkCommandMixin"
+  ],
+  "client": [
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "overwrites": {
     "requireAnnotations": true
-	}
+  }
 }

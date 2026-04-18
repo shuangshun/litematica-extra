@@ -18,7 +18,7 @@ A Litematica extension that adds various fixes and features
 
 ## Requirements
 
-- Minecraft 1.20.1 only (for now)
+- Minecraft 1.20.x (for now)
 - [Fabric Loader](https://fabricmc.net/) >= 0.14.21
 - [MaLiLib](https://modrinth.com/mod/malilib)
 - [Litematica](https://modrinth.com/mod/litematica)

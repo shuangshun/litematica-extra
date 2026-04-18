@@ -1,79 +1,86 @@
 plugins {
-	id "net.fabricmc.fabric-loom-remap" version "${loom_version}"
-	id "maven-publish"
+	id 'com.github.hierynomus.license' version '0.16.1' apply false
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
+
+	// https://github.com/ReplayMod/preprocessor
+	// https://github.com/Fallen-Breath/preprocessor
+	id 'com.replaymod.preprocess' version 'c5abb4fb12'
+
+	// https://github.com/Fallen-Breath/yamlang
+//	id 'me.fallenbreath.yamlang' version '1.5.0' apply false
 }
 
-version = project.mod_version
-group = project.maven_group
+preprocess {
+	strictExtraMappings = false
 
-base {
-	archivesName = project.archives_base_name
-}
+	def mc1201 = createNode('1.20.1', 1_20_01, '')
+	def mc1202 = createNode('1.20.2', 1_20_02, '')
+	def mc1204 = createNode('1.20.4', 1_20_04, '')
+	def mc1206 = createNode('1.20.6', 1_20_06, '')
 
-repositories {
-	maven {
-		url = "https://masa.dy.fi/maven/"
-		content { includeGroupAndSubgroups("fi.dy.masa") }
+	mc1201.link(mc1202, null)
+	mc1202.link(mc1204, null)
+	mc1204.link(mc1206, null)
+
+	// See https://github.com/Fallen-Breath/fabric-mod-template/blob/1d72d77a1c5ce0bf060c2501270298a12adab679/build.gradle#L55-L63
+	for (final def node in getNodes()) {
+		findProject(node.project).ext.mcVersion = node.mcVersion
 	}
+}
 
-	maven {
-		url = "https://cursemaven.com"
-		content { includeGroup("curse.maven") }
+tasks.register('buildAndGather') {
+	subprojects {
+		dependsOn project.tasks.named('build').get()
+	}
+	doFirst {
+		println 'Gathering builds'
+		def buildLibs = {
+			p -> p.buildDir.toPath().resolve('libs')
+		}
+		delete fileTree(buildLibs(rootProject)) {
+			include '*'
+		}
+		subprojects {
+			copy {
+				from(buildLibs(project)) {
+					include '*.jar'
+					exclude '*-dev.jar', '*-sources.jar', '*-shadow.jar'
+				}
+				into buildLibs(rootProject)
+				duplicatesStrategy = DuplicatesStrategy.INCLUDE
+			}
+		}
 	}
 }
 
-dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-
-	modImplementation("fi.dy.masa.malilib:malilib-fabric-${malilib_version}")
-	modImplementation("curse.maven:litematica-${litematica_project_id}:${litematica_file_id}")
-
-}
-
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
-}
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
-}
-
+// native
 import org.gradle.internal.os.OperatingSystem
 
 ext {
-	nativeOutputDir = file("${buildDir}/generated/native")
+	nativeOutputDir = file("${rootProject.buildDir}/generated/native")
 	nativeLibName = "Litematic_V7_To_V6_DynamicLibrary"
 }
 def os = OperatingSystem.current()
 
-tasks.register("buildNativeLibrary", Exec) {
-	description = "Build native library"
-	group = "litematica-extra"
+tasks.register('buildNativeLibrary', Exec) {
+	description = 'Build native library (shared across all versions)'
+	group = 'litematica-extra'
 
 	workingDir "${rootDir}/native/"
 
 	if (os.isWindows()) {
-		commandLine "cmd", "/c", "cmake-build.bat"
+		commandLine 'cmd', '/c', 'cmake-build.bat'
 	} else {
-		commandLine "bash", "cmake-build.sh"
+		commandLine 'bash', 'cmake-build.sh'
 	}
 }
 
-tasks.register("copyNativeLibrary", Copy) {
-	description = "Copy built native library to resources for packaging"
-	group = "litematica-extra"
+tasks.register('copyNativeLibrary', Copy) {
+	description = 'Copy built native library for packaging'
+	group = 'litematica-extra'
 
-	dependsOn "buildNativeLibrary"
+	dependsOn rootProject.tasks.named('buildNativeLibrary').get()
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
 	from("${rootDir}/native/build/Litematic_V7_To_V6_DynamicLibrary") {
@@ -85,32 +92,5 @@ tasks.register("copyNativeLibrary", Copy) {
 			include "lib${nativeLibName}.so"
 		}
 	}
-	into nativeOutputDir
-}
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
-	}
-
-	dependsOn "copyNativeLibrary"
-	from(nativeOutputDir) {
-		into "native"
-	}
-}
-
-jar {
-	inputs.property "archivesName", project.base.archivesName
-
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}"}
-	}
-
-	dependsOn "copyNativeLibrary"
-	from(nativeOutputDir) {
-		into "native"
-		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	}
+	into rootProject.ext.nativeOutputDir
 }
