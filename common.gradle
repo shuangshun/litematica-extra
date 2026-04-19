@@ -64,16 +64,21 @@ if (mcVersion >= 260000) {
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = JAVA_COMPATIBILITY
 
 loom {
-	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
 	runConfigs.configureEach {
 		// to make sure it generates all "Minecraft Client (:subproject_name)" applications
 		ideConfigGenerated = true
 		runDir '../../run'
+
+		def commonVmArgs = [
+				'-Dmixin.debug.export=true',
+				'-Dmixin.debug.countInjections=true'
+		]
 		vmArgs commonVmArgs
 	}
 
 	runConfigs.client {
 		ideConfigGenerated = true
+
 		def proArgs = ["--username", "dev"]
 		programArgs proArgs
 	}
@@ -121,6 +126,8 @@ processResources {
 			"name"                : project.mod_name,
 			"version"             : fullModVersion,
 			"minecraft_dependency": project.minecraft_dependency,
+			"malilib_dependency": project.malilib_dependency,
+			"litematica_dependency": project.litematica_dependency
 	]
 	inputs.properties(modProperties)
 

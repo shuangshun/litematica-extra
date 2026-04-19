@@ -4,13 +4,13 @@
   "version": "${version}",
 
   "name": "${name}",
-  "description": "Litematica extra",
+  "description": "A Litematica extension that adds various fixes and features",
   "authors": [
     "shuangshun",
     "chenjunfu2"
   ],
   "contact": {
-    "homepage": "https://github.com/shuangshun/litematica-extra",
+    "homepage": "https://modrinth.com/mod/litematica-extra",
     "sources": "https://github.com/shuangshun/litematica-extra"
   },
   "license": "LGPL-3.0",
@@ -29,6 +29,8 @@
 
   "depends": {
     "fabricloader": ">=0.14.21",
-    "minecraft": "${minecraft_dependency}"
+    "minecraft": "${minecraft_dependency}",
+    "malilib": "${malilib_dependency}",
+    "litematica": "${litematica_dependency}"
   }
 }
