@@ -31,7 +31,7 @@ Only the Windows version is provided in Releases, for Linux and other versions, 
 git clone --recurse-submodules https://github.com/shuangshun/litematica-extra.git
 cd litematica-extra
 
-./gradlew build
+./gradlew buildAndGather
 ```
 
 ## Credits

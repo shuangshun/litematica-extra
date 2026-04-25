@@ -55,13 +55,11 @@ tasks.register('buildAndGather') {
 }
 
 // native
-import org.gradle.internal.os.OperatingSystem
-
 ext {
 	nativeOutputDir = file("${rootProject.buildDir}/generated/native")
 	nativeLibName = "Litematic_V7_To_V6_DynamicLibrary"
 }
-def os = OperatingSystem.current()
+def os = org.gradle.internal.os.OperatingSystem.current()
 
 tasks.register('buildNativeLibrary', Exec) {
 	description = 'Build native library (shared across all versions)'
