@@ -25,6 +25,8 @@ A Litematica extension that adds various fixes and features
 
 ## Building
 
+Only the Windows version is provided in Releases, for Linux and other versions, please build them yourself
+
 ```bash
 git clone --recurse-submodules https://github.com/shuangshun/litematica-extra.git
 cd litematica-extra
