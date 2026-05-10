@@ -68,9 +68,13 @@ tasks.register('buildNativeLibrary', Exec) {
 	workingDir "${rootDir}/native/"
 
 	if (os.isWindows()) {
-		commandLine 'cmd', '/c', 'cmake-build.bat'
+		commandLine 'cmd', '/c', 'cmake-build-windows.bat'
+	} else if (os.isLinux()) {
+		commandLine 'bash', 'cmake-build-linux.sh'
+	} else if (os.isMacOsX()) {
+		commandLine 'bash', 'cmake-build-macos.sh'
 	} else {
-		commandLine 'bash', 'cmake-build.sh'
+		throw new GradleException("Unsupported operating system: ${os.name}")
 	}
 }
 
@@ -86,8 +90,10 @@ tasks.register('copyNativeLibrary', Copy) {
 			include "${nativeLibName}.dll"
 		} else if (os.isMacOsX()) {
 			include "lib${nativeLibName}.dylib"
-		} else {
+		} else if (os.isLinux()) {
 			include "lib${nativeLibName}.so"
+		} else {
+			throw new GradleException("Unsupported operating system: ${os.name}")
 		}
 	}
 	into rootProject.ext.nativeOutputDir
