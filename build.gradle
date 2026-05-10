@@ -60,6 +60,7 @@ ext {
 	nativeLibName = "Litematic_V7_To_V6_DynamicLibrary"
 }
 def os = org.gradle.internal.os.OperatingSystem.current()
+def osArch = System.getProperty('os.arch').toLowerCase()
 
 tasks.register('buildNativeLibrary', Exec) {
 	description = 'Build native library (shared across all versions)'
@@ -85,16 +86,27 @@ tasks.register('copyNativeLibrary', Copy) {
 	dependsOn rootProject.tasks.named('buildNativeLibrary').get()
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
-	from("${rootDir}/native/build/Litematic_V7_To_V6_DynamicLibrary") {
-		if (os.isWindows()) {
-			include "${nativeLibName}.dll"
-		} else if (os.isMacOsX()) {
-			include "lib${nativeLibName}.dylib"
-		} else if (os.isLinux()) {
-			include "lib${nativeLibName}.so"
-		} else {
-			throw new GradleException("Unsupported operating system: ${os.name}")
-		}
+	String archName = ''
+	if (osArch.contains('amd64') || osArch.contains('x86_64')) {
+		archName = 'x64'
+	} else if (osArch.contains('aarch64') || osArch.contains('arm64')) {
+		archName = 'arm64'
+	} else if (osArch.contains('x86') || osArch.contains('i386') || osArch.contains('i686')) {
+		archName = 'x86'
+	} else {
+		throw new GradleException("Unsupported architecture: ${osArch}")
+	}
+
+	from("${rootDir}/native/artifacts/") {
+        if (os.isWindows()) {
+            include "windows-${archName}/${nativeLibName}.dll"
+        } else if (os.isMacOsX()) {
+            include "macos-${archName}/lib${nativeLibName}.dylib"
+        } else if (os.isLinux()) {
+            include "linux-${archName}/lib${nativeLibName}.so"
+        } else {
+            throw new GradleException("Unsupported operating system: ${os.name}")
+        }
 	}
 	into rootProject.ext.nativeOutputDir
 }

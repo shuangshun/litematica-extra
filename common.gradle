@@ -107,7 +107,7 @@ if (os.isWindows()) {
 	platformSuffix = 'unknown'
 }
 
-String osArch = System.getProperty('os.arch').toLowerCase()
+def osArch = System.getProperty('os.arch').toLowerCase()
 if (osArch.contains('amd64') || osArch.contains('x86_64')) {
 	platformSuffix += '-x64'
 } else if (osArch.contains('aarch64') || osArch.contains('arm64')) {
