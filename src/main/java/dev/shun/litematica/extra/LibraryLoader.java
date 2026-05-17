@@ -25,12 +25,17 @@ import net.fabricmc.loader.api.FabricLoader;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
+import java.util.*;
 import java.nio.file.*;
 import java.security.*;
 
 public class LibraryLoader {
 
     private static boolean loaded = false;
+    private static final String platform = getPlatformName();
+    private static final String arch = getArchName();
+    private static final Boolean isWindows = platform.contains("windows");
+    private static final Boolean isAndroid = detectAndroid();
     private static final String LIBRARY_NAME = "Litematic_V7_To_V6_DynamicLibrary";
 
     public static synchronized void load() {
@@ -53,9 +58,8 @@ public class LibraryLoader {
     }
 
     private static File extractNativeLibrary(String libFileName) throws IOException {
-        String resourcePath = "native/" + libFileName;
-
-        Path tempDir = FabricLoader.getInstance().getGameDir().resolve("litematica_extra");
+        String resourcePath = "native/" + platform + "-" + arch + "/" + libFileName;
+        Path tempDir = getNativeLibDir();
         Files.createDirectories(tempDir);
 
         File libFile = tempDir.resolve(libFileName).toFile();
@@ -104,8 +108,7 @@ public class LibraryLoader {
                             StandardCopyOption.ATOMIC_MOVE);
 
                     // Linux/macOS
-                    String osName = System.getProperty("os.name").toLowerCase();
-                    if (!osName.contains("win")) {
+                    if (!isWindows) {
                         if (!libFile.setExecutable(true)) {
                             LOGGER.warn("Failed to set executable permission for {}", libFile.getAbsolutePath());
                         }
@@ -117,6 +120,111 @@ public class LibraryLoader {
         }
 
         return libFile;
+    }
+
+    private static String getPlatformName() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) {
+            return "windows";
+        } else if (osName.contains("mac")) {
+            return "macos";
+        } else if (osName.contains("linux")) {
+            return "linux";
+        } else {
+            throw new RuntimeException("Unsupported operating system: " + osName);
+        }
+    }
+
+    private static String getArchName() {
+        String osArch = System.getProperty("os.arch").toLowerCase();
+        if (osArch.contains("amd64") || osArch.contains("x86_64")) {
+            return "x64";
+        } else if (osArch.contains("aarch64") || osArch.contains("arm64")) {
+            return "arm64";
+        } else if (osArch.contains("x86") || osArch.contains("i386") || osArch.contains("i686")) {
+            return "x86";
+        } else {
+            throw new RuntimeException("Unsupported arch: " + osArch);
+        }
+    }
+
+    private static boolean detectAndroid() {
+        String[] launcherEnvKeys = {"FCL_NATIVEDIR", "POJAV_NATIVEDIR", "MOD_ANDROID_RUNTIME", "FCL_VERSION_CODE"};
+        for (String key : launcherEnvKeys) {
+            String val = System.getenv(key);
+            if (val != null && !val.isEmpty()) {
+                return true;
+            }
+        }
+
+        String androidRoot = System.getenv("ANDROID_ROOT");
+        String androidData = System.getenv("ANDROID_DATA");
+        if ((androidRoot != null && !androidRoot.isEmpty()) ||
+                (androidData != null && !androidData.isEmpty())) {
+            return true;
+        }
+
+        try {
+            if (new File("/system/build.prop").exists()) {
+                return true;
+            }
+        } catch (Exception ignored) {}
+
+        String vendor = System.getProperty("java.vendor", "").toLowerCase();
+        String vmName = System.getProperty("java.vm.name", "").toLowerCase();
+        return vendor.contains("android") || vmName.contains("dalvik") || vmName.contains("art");
+    }
+
+    private static Path getNativeLibDir() {
+        List<Path> candidates = resolveTempRootCandidates();
+
+        for (Path candidate : candidates) {
+            if (candidate == null) continue;
+
+            try {
+                Path dir = candidate.resolve("litematica_extra");
+                Files.createDirectories(dir);
+
+                Path testFile = dir.resolve(".write_test");
+                Files.write(testFile, new byte[0]);
+                Files.deleteIfExists(testFile);
+
+                LOGGER.debug("Using native library directory: {}", dir);
+                return dir;
+            } catch (Exception e) {
+                LOGGER.trace("Cannot use directory {}: {}", candidate, e.getMessage());
+            }
+        }
+
+        throw new RuntimeException("No writable directory found for native library extraction");
+    }
+
+    private static List<Path> resolveTempRootCandidates() {
+        LinkedHashSet<Path> candidates = new LinkedHashSet<>();
+
+        if (isAndroid) {
+            addCandidate(candidates, System.getenv("FCL_NATIVEDIR"));
+            addCandidate(candidates, System.getenv("POJAV_NATIVEDIR"));
+            addCandidate(candidates, System.getenv("MOD_ANDROID_RUNTIME"));
+        }
+
+        addCandidate(candidates, FabricLoader.getInstance().getGameDir().toString());
+
+        addCandidate(candidates, System.getProperty("java.io.tmpdir"));
+
+        addCandidate(candidates, System.getProperty("user.home"));
+        return List.copyOf(candidates);
+    }
+
+    private static void addCandidate(LinkedHashSet<Path> candidates, String path) {
+        if (path != null && !path.isEmpty()) {
+            try {
+                Path p = Paths.get(path);
+                if (Files.exists(p)) {
+                    candidates.add(p.toAbsolutePath().normalize());
+                }
+            } catch (Exception ignored) {}
+        }
     }
 
     private static byte[] calculateHash(InputStream is) throws IOException, NoSuchAlgorithmException {
