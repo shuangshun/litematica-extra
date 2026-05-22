@@ -32,7 +32,7 @@ import java.security.*;
 public class LibraryLoader {
 
     private static boolean loaded = false;
-    private static final String platform = getPlatformName();
+    private static String platform = getPlatformName();
     private static final String arch = getArchName();
     private static final Boolean isWindows = platform.contains("windows");
     private static final Boolean isAndroid = detectAndroid();
@@ -58,10 +58,10 @@ public class LibraryLoader {
     }
 
     private static File extractNativeLibrary(String libFileName) throws IOException {
-        String resourcePath = "native/" + platform + "-" + arch + "/" + libFileName;
         Path tempDir = getNativeLibDir();
-        Files.createDirectories(tempDir);
+        String resourcePath = "native/" + platform + "-" + arch + "/" + libFileName;
 
+        Files.createDirectories(tempDir);
         File libFile = tempDir.resolve(libFileName).toFile();
 
         try (InputStream is = LibraryLoader.class.getClassLoader().getResourceAsStream(resourcePath)) {
@@ -203,6 +203,7 @@ public class LibraryLoader {
         LinkedHashSet<Path> candidates = new LinkedHashSet<>();
 
         if (isAndroid) {
+            platform = "android";
             addCandidate(candidates, System.getenv("FCL_NATIVEDIR"));
             addCandidate(candidates, System.getenv("POJAV_NATIVEDIR"));
             addCandidate(candidates, System.getenv("MOD_ANDROID_RUNTIME"));
