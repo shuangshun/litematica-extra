@@ -100,7 +100,7 @@ tasks.register('buildNativeLibrary', Exec) {
 	workingDir "${rootDir}/native/"
 
 	if (os.isWindows()) {
-		commandLine 'cmd', '/c', 'cmake-build-windows.bat'
+		commandLine 'cmd', '/c', 'sln-build-windows.bat', archName
 	} else if (os.isLinux()) {
 		commandLine 'bash', 'cmake-build-linux.sh'
 	} else if (os.isMacOsX()) {
