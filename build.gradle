@@ -89,7 +89,7 @@ if (osArch.contains('amd64') || osArch.contains('x86_64')) {
 String nativePlatform = "${platformName}-${archName}"
 
 ext {
-	nativeOutputDir = file("${rootProject.buildDir}/generated/native")
+	nativeOutputDir = file("${rootProject.buildDir}/generated/natives")
 	systemPlatform = nativePlatform
 }
 
