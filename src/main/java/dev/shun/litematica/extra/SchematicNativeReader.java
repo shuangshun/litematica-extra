@@ -25,20 +25,47 @@ import net.minecraft.util.FixedBufferInputStream;
 import dev.shun.litematica.extra.nbt.*;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
-import java.util.zip.*;
 import java.io.*;
+import java.nio.file.*;
+import java.util.zip.*;
 
 public class SchematicNativeReader {
 
-    public static native byte[] V7_To_V6(byte[] rawNbtData);
+    private static native byte[] V7_To_V6(byte[] rawNbtData);
 
-    public static byte[] convertSchematicIfNeeded(byte[] compressedInput) {
-        if (compressedInput == null || compressedInput.length < 10) {
+    public static byte[] readAndConvertSchematic(Path path, boolean compress) {
+        byte[] compressedData;
+        try {
+            compressedData = Files.readAllBytes(path);
+        } catch (Exception e) {
+            LOGGER.error("Failed to read schematic: ", e);
+            return null;
+        }
+
+        byte [] processedData = convertSchematicIfNeeded(compressedData);
+        if (processedData == null) {
+            return null;
+        }
+
+        if (compress) {
+            try {
+                return compressGzip(processedData);
+            } catch (IOException e) {
+                LOGGER.error("Failed to compress schematic: ", e);
+                return null;
+            }
+        } else {
+            return processedData;
+        }
+    }
+
+    private static byte[] convertSchematicIfNeeded(byte[] schematicData) {
+        if (schematicData == null || schematicData.length < 10) {
             return null;
         }
 
         try {
-            byte[] rawNbt = decompressGzip(compressedInput);
+            byte[] rawNbt = isGzipCompressed(schematicData) ? decompressGzip(schematicData) : schematicData;
 
             Integer version = readVersion(rawNbt);
             if (version != null && version <= 6) {
@@ -48,7 +75,7 @@ public class SchematicNativeReader {
             return V7_To_V6(rawNbt);
 
         } catch (Exception e) {
-            LOGGER.error("Schematic conversion failed", e);
+            LOGGER.error("Failed to conversion schematic: ", e);
             return null;
         }
     }
@@ -68,6 +95,10 @@ public class SchematicNativeReader {
         }
     }
 
+    private static boolean isGzipCompressed(byte[] data) {
+        return data != null && data.length >= 2 && data[0] == (byte) 0x1F && data[1] == (byte) 0x8B;
+    }
+
     private static byte[] decompressGzip(byte[] data) throws IOException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
              GZIPInputStream gis = new GZIPInputStream(bis);
@@ -83,13 +114,13 @@ public class SchematicNativeReader {
         }
     }
 
-//    private static byte[] compressGzip(byte[] data) throws IOException {
-//        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//             GZIPOutputStream gos = new GZIPOutputStream(bos)
-//        ) {
-//            gos.write(data);
-//            gos.finish();
-//            return bos.toByteArray();
-//        }
-//    }
+    private static byte[] compressGzip(byte[] data) throws IOException {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             GZIPOutputStream gos = new GZIPOutputStream(bos)
+        ) {
+            gos.write(data);
+            gos.finish();
+            return bos.toByteArray();
+        }
+    }
 }

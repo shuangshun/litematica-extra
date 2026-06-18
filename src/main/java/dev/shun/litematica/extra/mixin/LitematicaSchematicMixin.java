@@ -21,6 +21,7 @@
 package dev.shun.litematica.extra.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -34,7 +35,6 @@ import dev.shun.litematica.extra.SchematicNativeReader;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
-import java.nio.file.*;
 import java.util.zip.GZIPInputStream;
 
 @Mixin(LitematicaSchematic.class)
@@ -51,9 +51,7 @@ public abstract class LitematicaSchematicMixin {
         }
 
         try {
-            byte[] compressedData = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-            byte[] processedData = SchematicNativeReader.convertSchematicIfNeeded(compressedData);
-
+            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(file.toPath(), false);
             if (processedData != null) {
                 NbtCompound nbt = NbtIo.read(new DataInputStream(new ByteArrayInputStream(processedData)));
                 cir.setReturnValue(nbt);
@@ -78,8 +76,9 @@ public abstract class LitematicaSchematicMixin {
         }
 
         try (FileInputStream fis = new FileInputStream(file);
-             GZIPInputStream gis = new GZIPInputStream(fis);
-             FixedBufferInputStream fbis = new FixedBufferInputStream(gis)
+             BufferedInputStream bis = new BufferedInputStream(fis);
+             InputStream rawStream = isGzipCompressed(bis) ? new GZIPInputStream(bis) : bis;
+             FixedBufferInputStream fbis = new FixedBufferInputStream(rawStream)
         ) {
             NbtStreamScanner scanner = new NbtStreamScanner(fbis);
             NbtScanResult result = scanner.scan("Version", "Metadata");
@@ -108,5 +107,21 @@ public abstract class LitematicaSchematicMixin {
             cir.setReturnValue(null);
             cir.cancel();
         }
+    }
+
+    @Unique
+    private static boolean isGzipCompressed(InputStream in) throws IOException {
+        if (in == null) {
+            throw new IOException("InputStream is null");
+        }
+        if (!in.markSupported()) {
+            throw new IOException("InputStream must support mark/reset");
+        }
+
+        in.mark(2);
+        int b1 = in.read();
+        int b2 = in.read();
+        in.reset();
+        return b1 == 0x1F && b2 == 0x8B;
     }
 }
