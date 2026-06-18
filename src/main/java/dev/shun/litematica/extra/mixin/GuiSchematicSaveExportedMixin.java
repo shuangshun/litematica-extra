@@ -89,14 +89,14 @@ public abstract class GuiSchematicSaveExportedMixin {
         }
 
         try {
-            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(sourcePath, true);
+            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(sourcePath, true, true);
             if (processedData != null) {
                 Files.write(targetPath, processedData);
             }
 
             return true;
         } catch (Exception e) {
-            LOGGER.error("Failed to downgrade: {}", e.getMessage());
+            LOGGER.error("Failed to downgrade: ", e);
             return false;
         }
     }

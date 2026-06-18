@@ -32,8 +32,9 @@ import java.util.zip.*;
 public class SchematicNativeReader {
 
     private static native byte[] V7_To_V6(byte[] rawNbtData);
+    private static native byte[] sortFields(byte[] nbtData);
 
-    public static byte[] readAndConvertSchematic(Path path, boolean compress) {
+    public static byte[] readAndConvertSchematic(Path path, boolean compress, boolean sort) {
         byte[] compressedData;
         try {
             compressedData = Files.readAllBytes(path);
@@ -45,6 +46,10 @@ public class SchematicNativeReader {
         byte [] processedData = convertSchematicIfNeeded(compressedData);
         if (processedData == null) {
             return null;
+        }
+
+        if (sort) {
+            processedData = sortFields(processedData);
         }
 
         if (compress) {
