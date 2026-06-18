@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "스키매틱이 다운그레이드 내보내기 되었습니다. '%s' §6참고: 이것은 실험적 기능입니다; 데이터 손실이 있을 수 있습니다.§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "라이트매티카 스키매틱 다운그레이드에 실패했습니다."
+
+    schematic_write_to_file_failed:
+      exists: "스키매틱 파일 저장에 실패했습니다. '%s' 파일이 이미 존재합니다."
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "V6 (1.20.4) 라이트매틱"

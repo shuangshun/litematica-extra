@@ -5,7 +5,12 @@
   "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
   "mixins": [
     "LitematicaSchematicMixin",
-    "TaskPasteSchematicPerChunkCommandMixin"
+    "TaskPasteSchematicPerChunkCommandMixin",
+    "GuiSchematicSaveExportedMixin",
+    "GuiSchematicManagerExportTypeMixin",
+    "accessor.GuiListBaseAccessor",
+    "accessor.GuiSchematicSaveBaseAccessor",
+    "accessor.GuiSchematicSaveExportedAccessor"
   ],
   "client": [],
   "injectors": {

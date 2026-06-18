@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "Schemaexport nedgraderad som '%s' §6OBS: Detta är en experimentell funktion; dataförlust kan förekomma.§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "Kunde inte nedgradera Litematica-schemat"
+
+    schematic_write_to_file_failed:
+      exists: "Kunde inte skriva schemat till filen '%s', filen finns redan"
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "V6 (1.20.4) Litematic"

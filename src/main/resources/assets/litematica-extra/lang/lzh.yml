@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "蜃圖既左遷其版而存如「%s」 §註：惟供一試耳；錄或遺闕。§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "降此清影蜃圖而未成"
+
+    schematic_write_to_file_failed:
+      exists: "錄蜃圖至案「%s」而未成，案既有焉。"
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "版六（一點二〇點四）蜃圖"

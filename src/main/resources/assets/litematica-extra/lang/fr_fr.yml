@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "Exportation schématique rétrogradée en '%s' §6REMARQUE : il s'agit d'une fonctionnalité expérimentale ; une perte de données peut se produire.§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "Impossible de rétrograder le schéma Litematica"
+
+    schematic_write_to_file_failed:
+      exists: "Impossible d'écrire le schéma dans le fichier '%s', le fichier existe déjà"
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "V6 (1.20.4) Litematic"

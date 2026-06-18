@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "§a原理图已降级导出为'%s' §6注意：此为实验性功能，可能导致数据丢失§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "Litematica原理图版本回退失败"
+
+    schematic_write_to_file_failed:
+      exists: "无法写入文件'%s'，文件已存在"
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "V6 (1.20.4) 原理图"

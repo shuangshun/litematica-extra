@@ -1,0 +1,17 @@
+litematica-extra:
+  message:
+    litematic_downgrade_exported_as: "Şematik dışa aktarımı '%s' olarak eski sürüme dönüştürüldü §6NOT: Bu deneysel bir özelliktir; veri kaybı yaşanabilir.§r"
+
+  error:
+    schematic_conversion:
+      litematic_to_litematica:
+        failed_to_downgrade_litematic: "Litematica şematiği eski sürüme dönüştürülemedi"
+
+    schematic_write_to_file_failed:
+      exists: "Şematik '%s' dosyasına yazılamadı, dosya zaten mevcut"
+
+  gui:
+    label:
+      schematic_manager:
+        export_type:
+          v6_litematic: "V6 (1.20.4) Litematic"

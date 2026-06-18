@@ -4,7 +4,7 @@ final boolean unobfuscated = mcVersion >= 26_00_00
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
 apply plugin: 'com.replaymod.preprocess'
-//apply plugin: 'me.fallenbreath.yamlang'
+apply plugin: 'me.fallenbreath.yamlang'
 
 repositories {
 //	maven {
@@ -48,7 +48,7 @@ dependencies {
 }
 
 String MIXIN_CONFIG_PATH = 'litematica-extra.mixins.json'
-//String LANG_DIR = 'assets/litematica-extra/lang'
+String LANG_DIR = 'assets/litematica-extra/lang'
 JavaVersion JAVA_COMPATIBILITY
 if (mcVersion >= 260000) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_25
@@ -135,10 +135,10 @@ processResources {
 }
 
 // https://github.com/Fallen-Breath/yamlang
-//yamlang {
-//	targetSourceSets = [sourceSets.main]
-//	inputDir = LANG_DIR
-//}
+yamlang {
+	targetSourceSets = [sourceSets.main]
+	inputDir = LANG_DIR
+}
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is
 // this fixes some edge cases with special characters not displaying correctly
