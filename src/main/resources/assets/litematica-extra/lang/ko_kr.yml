@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "스키매틱이 다운그레이드 내보내기 되었습니다. '%s' §6참고: 이것은 실험적 기능입니다; 데이터 손실이 있을 수 있습니다.§r"
+    litematic_downgrade_exported_as: "스키매틱이 다운그레이드 내보내기 되었습니다. '%s'\n§6참고: 이것은 실험적 기능입니다; 데이터 손실이 있을 수 있습니다.§r"
 
   error:
     schematic_conversion:

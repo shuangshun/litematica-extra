@@ -51,7 +51,7 @@ public abstract class LitematicaSchematicMixin {
         }
 
         try {
-            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(file.toPath(), false, false);
+            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(file.toPath(), false, false, null);
             if (processedData != null) {
                 NbtCompound nbt = NbtIo.read(new DataInputStream(new ByteArrayInputStream(processedData)));
                 cir.setReturnValue(nbt);

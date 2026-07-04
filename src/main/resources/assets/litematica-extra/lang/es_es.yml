@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "Exportación de esquema degradada como '%s' §6NOTA: Esta es una característica experimental; puede ocurrir pérdida de datos.§r"
+    litematic_downgrade_exported_as: "Exportación de esquema degradada como '%s'\n§6NOTA: Esta es una característica experimental; puede ocurrir pérdida de datos.§r"
 
   error:
     schematic_conversion:

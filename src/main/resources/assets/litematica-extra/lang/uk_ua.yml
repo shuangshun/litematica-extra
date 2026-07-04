@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "Експорт схематики знижено як «%s» §6ПРИМІТКА: Це експериментальна функція; може статися втрата даних§r"
+    litematic_downgrade_exported_as: "Експорт схематики знижено як «%s»\n§6ПРИМІТКА: Це експериментальна функція; може статися втрата даних§r"
 
   error:
     schematic_conversion:

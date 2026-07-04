@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "§a原理图已降级导出为'%s' §6注意：此为实验性功能，可能导致数据丢失§r"
+    litematic_downgrade_exported_as: "§a原理图已降级导出为'%s'\n§6注意：此为实验性功能，可能导致数据丢失§r"
 
   error:
     schematic_conversion:

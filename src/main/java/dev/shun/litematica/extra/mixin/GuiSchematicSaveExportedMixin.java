@@ -42,6 +42,7 @@ import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.*;
 
 @Mixin(targets = "fi.dy.masa.litematica.gui.GuiSchematicSaveExported$ButtonListener")
 public abstract class GuiSchematicSaveExportedMixin {
@@ -54,8 +55,8 @@ public abstract class GuiSchematicSaveExportedMixin {
     private void onActionPerformed(ButtonBase button, int mouseButton, CallbackInfo ci) {
         if (!V6ModeState.isActive()) return;
 
-        GuiSchematicSaveExportedAccessor exportedAccessor = (GuiSchematicSaveExportedAccessor) gui;
         GuiSchematicSaveBaseAccessor baseAccessor = (GuiSchematicSaveBaseAccessor) gui;
+        GuiSchematicSaveExportedAccessor exportedAccessor = (GuiSchematicSaveExportedAccessor) gui;
         GuiListBaseAccessor listAccessor = (GuiListBaseAccessor) gui;
         WidgetFileBrowserBase listWidget = (WidgetFileBrowserBase) listAccessor.invokeGetListWidget();
 
@@ -64,8 +65,9 @@ public abstract class GuiSchematicSaveExportedMixin {
         String inFile = exportedAccessor.getInputFileName();
         File outDir = listWidget.getCurrentDirectory();
         boolean override = GuiBase.isShiftDown();
+        boolean ignoreEntities = baseAccessor.getCheckboxIgnoreEntities().isChecked();
 
-        if (convertToV6(inDir, inFile, outDir, fileName, override, gui)) {
+        if (convertToV6(inDir, inFile, outDir, fileName, ignoreEntities, override, gui)) {
             gui.addMessage(MessageType.SUCCESS, "litematica-extra.message.litematic_downgrade_exported_as", fileName);
             listWidget.refreshEntries();
         } else {
@@ -75,7 +77,7 @@ public abstract class GuiSchematicSaveExportedMixin {
     }
 
     @Unique
-    private boolean convertToV6(File inDir, String inFile, File outDir, String outFileName, boolean override, IStringConsumer feedback) {
+    private boolean convertToV6(File inDir, String inFile, File outDir, String outFileName, boolean ignoreEntities, boolean override, IStringConsumer feedback) {
         String targetName = outFileName;
         if (!targetName.endsWith(".litematic")) {
             targetName += ".litematic";
@@ -89,7 +91,15 @@ public abstract class GuiSchematicSaveExportedMixin {
         }
 
         try {
-            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(sourcePath, true, true);
+            Map<String, Boolean> fieldsToErase = new HashMap<>();
+            if (ignoreEntities) {
+                fieldsToErase.put("*/Regions/*/Entities", true);
+            }
+
+            byte[] processedData = SchematicNativeReader.readAndConvertSchematic(sourcePath,
+                    true, true, fieldsToErase
+            );
+
             if (processedData != null) {
                 Files.write(targetPath, processedData);
             }

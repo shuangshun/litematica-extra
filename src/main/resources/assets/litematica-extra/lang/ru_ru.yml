@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "Схема сохранена с понижением версии как '%s' §6Примечание: Экспериментально! Может привести к потере данных.§r"
+    litematic_downgrade_exported_as: "Схема сохранена с понижением версии как '%s'\n§6Примечание: Экспериментально! Может привести к потере данных.§r"
 
   error:
     schematic_conversion:

@@ -27,14 +27,38 @@ import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.*;
 import java.util.zip.*;
 
 public class SchematicNativeReader {
 
-    private static native byte[] V7_To_V6(byte[] rawNbtData);
-    private static native byte[] sortFields(byte[] nbtData);
+    public enum NativeOp {
+        CONVERT_V7_TO_V6(1),
+        SORT_FIELDS(2),
+        ERASE_FIELDS(3);
 
-    public static byte[] readAndConvertSchematic(Path path, boolean compress, boolean sort) {
+        private final int code;
+
+        NativeOp(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+    }
+
+    private static native byte[] nativeExecute(
+            byte[] nbtData,
+            int[] ops,
+            long[] paramBlocks, byte[] paramData
+    );
+
+    public static byte[] readAndConvertSchematic(
+            Path path,
+            boolean compress, boolean sort,
+            Map<String, Boolean> fieldsToErase
+    ) {
         byte[] compressedData;
         try {
             compressedData = Files.readAllBytes(path);
@@ -43,13 +67,9 @@ public class SchematicNativeReader {
             return null;
         }
 
-        byte [] processedData = convertSchematicIfNeeded(compressedData);
+        byte[] processedData = convertAndProcessSchematic(compressedData, sort, fieldsToErase);
         if (processedData == null) {
             return null;
-        }
-
-        if (sort) {
-            processedData = sortFields(processedData);
         }
 
         if (compress) {
@@ -64,25 +84,104 @@ public class SchematicNativeReader {
         }
     }
 
-    private static byte[] convertSchematicIfNeeded(byte[] schematicData) {
+    private static byte[] convertAndProcessSchematic(
+            byte[] schematicData,
+            boolean sort,
+            Map<String, Boolean> fieldsToErase
+    ) {
         if (schematicData == null || schematicData.length < 10) {
             return null;
         }
 
         try {
-            byte[] rawNbt = isGzipCompressed(schematicData) ? decompressGzip(schematicData) : schematicData;
+            byte[] rawNbt = isGzipCompressed(schematicData)
+                    ? decompressGzip(schematicData)
+                    : schematicData;
 
             Integer version = readVersion(rawNbt);
-            if (version != null && version <= 6) {
+            boolean needConvert = (version == null || version > 6);
+            boolean needErase = (fieldsToErase != null && !fieldsToErase.isEmpty());
+
+            if (!needConvert && !sort && !needErase) {
                 return rawNbt;
             }
 
-            return V7_To_V6(rawNbt);
+            List<NativeOp> opsList = new ArrayList<>(3);
+            if (needConvert) opsList.add(NativeOp.CONVERT_V7_TO_V6);
+            if (sort) opsList.add(NativeOp.SORT_FIELDS);
+            if (needErase) opsList.add(NativeOp.ERASE_FIELDS);
+
+            int[] ops = opsList.stream().mapToInt(NativeOp::getCode).toArray();
+            long[] paramBlocks = new long[opsList.size()];
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            int blockIndex = 0;
+            for (NativeOp op : opsList) {
+                if (op == NativeOp.ERASE_FIELDS && fieldsToErase != null) {
+                    encodeEraseFieldsParams(bos, fieldsToErase, paramBlocks, blockIndex);
+                }
+                blockIndex++;
+            }
+
+            byte[] paramData = bos.size() > 0 ? bos.toByteArray() : new byte[0];
+
+            return nativeExecute(rawNbt, ops, paramBlocks, paramData);
 
         } catch (Exception e) {
             LOGGER.error("Failed to conversion schematic: ", e);
             return null;
         }
+    }
+
+    private static void encodeEraseFieldsParams(
+            ByteArrayOutputStream bos,
+            Map<String, Boolean> fieldsToErase,
+            long[] paramBlocks, int blockIndex
+    ) {
+        try {
+            // starting offset
+            int offset = bos.size();
+
+            bos.write(intToBytes(fieldsToErase.size()));
+            for (Map.Entry<String, Boolean> entry : fieldsToErase.entrySet()) {
+                String name = entry.getKey();
+                Boolean mode = entry.getValue();
+                byte[] nameBytes = toModifiedUtf8(name);
+
+                // 1=REMOVE, 0=CLEAR
+                bos.write(mode ? 1 : 0);
+                bos.write((nameBytes.length >> 8) & 0xFF);
+                bos.write(nameBytes.length & 0xFF);
+                bos.write(nameBytes);
+            }
+
+            // operation parameter length
+            int length = bos.size() - offset;
+            if (paramBlocks != null) {
+                paramBlocks[blockIndex] = ((long) offset << 32) | (length & 0xFFFFFFFFL);
+            }
+        } catch (IOException ignored) {}
+    }
+
+    private static byte[] intToBytes(int value) {
+        return new byte[] {
+                (byte) (value >> 24),
+                (byte) (value >> 16),
+                (byte) (value >> 8),
+                (byte) value
+        };
+    }
+
+    private static byte[] toModifiedUtf8(String s) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (DataOutputStream dos = new DataOutputStream(bos)) {
+            dos.writeUTF(s);
+        } catch (IOException ignored) {}
+
+        byte[] data = bos.toByteArray();
+        // writeUTF: 2-byte length
+        return Arrays.copyOfRange(data, 2, data.length);
     }
 
     private static Integer readVersion(byte[] data) throws IOException {

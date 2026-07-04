@@ -1,6 +1,6 @@
 litematica-extra:
   message:
-    litematic_downgrade_exported_as: "蜃圖既左遷其版而存如「%s」 §註：惟供一試耳；錄或遺闕。§r"
+    litematic_downgrade_exported_as: "蜃圖既左遷其版而存如「%s」\n§註：惟供一試耳；錄或遺闕。§r"
 
   error:
     schematic_conversion:

@@ -21,12 +21,17 @@
 package dev.shun.litematica.extra.mixin.accessor;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import fi.dy.masa.malilib.gui.widgets.WidgetCheckBox;
 import fi.dy.masa.litematica.gui.GuiSchematicSaveBase;
 
 @Mixin(GuiSchematicSaveBase.class)
 public interface GuiSchematicSaveBaseAccessor {
+
+    @Accessor("checkboxIgnoreEntities")
+    WidgetCheckBox getCheckboxIgnoreEntities();
 
     @Invoker("getTextFieldText")
     String invokeGetTextFieldText();
