@@ -4,7 +4,7 @@
 [![GitHub Releases downloads](https://shields.io/github/downloads/shuangshun/litematica-extra/total)](https://github.com/shuangshun/litematica-extra/releases)
 [![GitHub Repo stars](https://shields.io/github/stars/shuangshun/litematica-extra)](https://github.com/shuangshun/litematica-extra)
 
-A Litematica extension that adds various fixes and features
+A Litematica extension that adds various fixes, backports, and features for versions below 1.21
 
 ---
 
@@ -12,7 +12,11 @@ A Litematica extension that adds various fixes and features
 
 - Automatically downgrade schematic version from V7 (Minecraft 1.20.5+) to V6 (Minecraft 1.20.4-), achieving compatibility with older versions while preserving data such as blocks, entities, and containers as much as possible
 
+- Added V6 schematic option to schematic export
+
 - Fix duplicate entity pasting when pasting entities at chunk boundaries on servers
+
+- Replace full metadata read with NBT scanner for better performance
 
 ---
 
