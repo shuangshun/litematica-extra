@@ -27,6 +27,7 @@ import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
 import java.nio.file.*;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.zip.*;
 
@@ -49,7 +50,7 @@ public class SchematicNativeReader {
     }
 
     private static native byte[] nativeExecute(
-            byte[] nbtData,
+            ByteBuffer nbtData,
             int[] ops,
             long[] paramBlocks, byte[] paramData
     );
@@ -67,7 +68,10 @@ public class SchematicNativeReader {
             return null;
         }
 
+        long start = System.nanoTime();
         byte[] processedData = convertAndProcessSchematic(compressedData, sort, fieldsToErase);
+        long end = System.nanoTime();
+        LOGGER.info("convertAndProcessSchematic took {} ms", (end - start) / 1_000_000.0);
         if (processedData == null) {
             return null;
         }
@@ -106,6 +110,13 @@ public class SchematicNativeReader {
                 return rawNbt;
             }
 
+            int bufferCapacity = needConvert
+                    ? (int) (rawNbt.length * 1.2)
+                    : rawNbt.length;
+            ByteBuffer directBuffer = ByteBuffer.allocateDirect(bufferCapacity);
+            directBuffer.put(rawNbt);
+            directBuffer.flip();
+
             List<NativeOp> opsList = new ArrayList<>(3);
             if (needConvert) opsList.add(NativeOp.CONVERT_V7_TO_V6);
             if (sort) opsList.add(NativeOp.SORT_FIELDS);
@@ -126,9 +137,15 @@ public class SchematicNativeReader {
 
             byte[] paramData = bos.size() > 0 ? bos.toByteArray() : new byte[0];
 
-            return nativeExecute(rawNbt, ops, paramBlocks, paramData);
-
-        } catch (Exception e) {
+            byte[] result = nativeExecute(directBuffer, ops, paramBlocks, paramData);
+            if (result == null) {
+                byte[] processedData = new byte[directBuffer.remaining()];
+                directBuffer.get(processedData);
+                return processedData;
+            } else {
+                return result;
+            }
+        } catch (Throwable e) {
             LOGGER.error("Failed to conversion schematic: ", e);
             return null;
         }
