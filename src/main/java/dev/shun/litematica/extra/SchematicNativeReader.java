@@ -68,10 +68,7 @@ public class SchematicNativeReader {
             return null;
         }
 
-        long start = System.nanoTime();
         byte[] processedData = convertAndProcessSchematic(compressedData, sort, fieldsToErase);
-        long end = System.nanoTime();
-        LOGGER.info("convertAndProcessSchematic took {} ms", (end - start) / 1_000_000.0);
         if (processedData == null) {
             return null;
         }
