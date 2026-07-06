@@ -67,7 +67,6 @@ class GitHubAPI:
         params = []
         if status:
             params.append(f"status={status}")
-        params.append(f"branch={self.branch}")
         params.append("per_page=1")
 
         query_string = "&".join(params)
