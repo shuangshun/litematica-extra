@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "礦藝：§f%s§r [蜃圖 §f%d§r]"
+          newer: "礦藝：§c%s§r [蜃圖 §c%d§r]"
+
+        version: "「清影」之版：§f%d§r"
+        sponge_version: "海綿端版：§f%d§r"
+        vanilla_version: "原版之構"
+
       schematic_manager:
         export_type:
           v6_litematic: "版六（一點二〇點四）蜃圖"

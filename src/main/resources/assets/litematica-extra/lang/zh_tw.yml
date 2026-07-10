@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "我的世界：§f%s§r [資料版本 §f%d§r]"
+          newer: "Minecraft: §c%s§r [Schema §c%d§r]"
+
+        version: "Litematica 版本：§f%d§r"
+        sponge_version: "Sponge 版本：§f%d§r"
+        vanilla_version: "原版結構"
+
       schematic_manager:
         export_type:
           v6_litematic: "V6 (1.20.4) Litematic"

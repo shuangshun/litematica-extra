@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "Minecraft: §f%s§r [スキーマ §f%d§r]"
+          newer: "Minecraft: §c%s§r [スキーマ §c%d§r]"
+
+        version: "Litematicバージョン: §f%d§r"
+        sponge_version: "Spongeバージョン: §f%d§r"
+        vanilla_version: "バニラの構造物"
+
       schematic_manager:
         export_type:
           v6_litematic: "V6 (1.20.4) Litematic"

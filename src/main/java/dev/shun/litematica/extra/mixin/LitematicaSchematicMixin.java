@@ -32,6 +32,7 @@ import fi.dy.masa.litematica.schematic.SchematicMetadata;
 import fi.dy.masa.litematica.schematic.LitematicaSchematic;
 import dev.shun.litematica.extra.nbt.*;
 import dev.shun.litematica.extra.SchematicNativeReader;
+import dev.shun.litematica.extra.api.ISchematicMetadata;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
@@ -81,7 +82,7 @@ public abstract class LitematicaSchematicMixin {
              FixedBufferInputStream fbis = new FixedBufferInputStream(rawStream)
         ) {
             NbtStreamScanner scanner = new NbtStreamScanner(fbis);
-            NbtScanResult result = scanner.scan("Version", "Metadata");
+            NbtScanResult result = scanner.scan("Version", "MinecraftDataVersion", "Metadata");
 
             Integer version = result.getInt("Version");
             if (version == null || version < 1) {
@@ -99,6 +100,21 @@ public abstract class LitematicaSchematicMixin {
 
             SchematicMetadata metadata = new SchematicMetadata();
             metadata.readFromNBT(metadataNbt);
+
+            ISchematicMetadata ext = ISchematicMetadata.of(metadata);
+            ext.setSchematicVersion(version);
+
+            Integer dataVersion = result.getInt("MinecraftDataVersion");
+            if (dataVersion != null) {
+                ext.setMinecraftDataVersion(dataVersion);
+            }
+
+            String fileType = "unknown";
+            if (fileName.endsWith(".litematic")) fileType = "litematic";
+            else if (fileName.endsWith(".schem")) fileType = "schem";
+            else if (fileName.endsWith(".nbt")) fileType = "nbt";
+            ext.setFileType(fileType);
+
             cir.setReturnValue(metadata);
             cir.cancel();
 

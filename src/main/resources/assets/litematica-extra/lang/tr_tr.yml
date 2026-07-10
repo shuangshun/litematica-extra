@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "Minecraft: §f%s§r [Şema §f%d§r]"
+          newer: "Minecraft: §c%s§r [Şema §c%d§r]"
+
+        version: "Litematic Sürümü: §f%d§r"
+        sponge_version: "Sponge Sürümü: §f%d§r"
+        vanilla_version: "Vanilla Yapısı (Structure)"
+
       schematic_manager:
         export_type:
           v6_litematic: "V6 (1.20.4) Litematic"

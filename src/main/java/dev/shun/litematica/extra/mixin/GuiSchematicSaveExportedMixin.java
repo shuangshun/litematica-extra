@@ -47,8 +47,7 @@ import java.util.*;
 @Mixin(targets = "fi.dy.masa.litematica.gui.GuiSchematicSaveExported$ButtonListener")
 public abstract class GuiSchematicSaveExportedMixin {
 
-    @Final
-    @Shadow(remap = false)
+    @Final @Shadow(remap = false)
     private GuiSchematicSaveExported gui;
 
     @Inject(method = "actionPerformedWithButton", at = @At("HEAD"), cancellable = true, remap = false)

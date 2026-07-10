@@ -4,10 +4,12 @@
   "package": "dev.shun.litematica.extra.mixin",
   "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
   "mixins": [
-    "LitematicaSchematicMixin",
-    "TaskPasteSchematicPerChunkCommandMixin",
     "GuiSchematicSaveExportedMixin",
     "GuiSchematicManagerExportTypeMixin",
+    "SchematicMetadataMixin",
+    "LitematicaSchematicMixin",
+    "WidgetSchematicBrowserMixin",
+    "TaskPasteSchematicPerChunkCommandMixin",
     "accessor.GuiListBaseAccessor",
     "accessor.GuiSchematicSaveBaseAccessor",
     "accessor.GuiSchematicSaveExportedAccessor"

@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "마인크래프트: §f%s§r [스키마 §f%d§r]"
+          newer: "마인크래프트: §c%s§r [스키마 §c%d§r]"
+
+        version: "라이트매틱 버전: §f%d§r"
+        sponge_version: "Sponge 버전: §f%d§r"
+        vanilla_version: "바닐라 구조물"
+
       schematic_manager:
         export_type:
           v6_litematic: "V6 (1.20.4) 라이트매틱"

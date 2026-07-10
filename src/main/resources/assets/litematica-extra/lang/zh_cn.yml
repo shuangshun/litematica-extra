@@ -12,6 +12,15 @@ litematica-extra:
 
   gui:
     label:
+      schematic_info:
+        schema:
+          .: "游戏版本：§f%s§r [原理图版本： §f%d§r]"
+          newer: "游戏版本：§c%s§r [原理图版本：§c%d§r]"
+
+        version: "Litematic版本：§f%d§r"
+        sponge_version: "Sponge版本：§f%d§r"
+        vanilla_version: "原版结构"
+
       schematic_manager:
         export_type:
           v6_litematic: "V6 (1.20.4) 原理图"
