@@ -20,14 +20,14 @@
 
 package dev.shun.litematica.extra.mixin;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.jetbrains.annotations.Nullable;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import net.minecraft.client.gui.DrawContext;
 import fi.dy.masa.malilib.util.StringUtils;

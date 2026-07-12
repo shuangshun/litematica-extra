@@ -189,9 +189,4 @@ public enum Schema {
         }
         return null;
     }
-
-    @Override
-    public String toString() {
-        return "MC: " + this.str + " [Schema: " + this.schemaId + "]";
-    }
 }

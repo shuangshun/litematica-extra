@@ -126,7 +126,7 @@ public class SchematicNativeReader {
 
             int blockIndex = 0;
             for (NativeOp op : opsList) {
-                if (op == NativeOp.ERASE_FIELDS && fieldsToErase != null) {
+                if (op == NativeOp.ERASE_FIELDS) {
                     encodeEraseFieldsParams(bos, fieldsToErase, paramBlocks, blockIndex);
                 }
                 blockIndex++;
