@@ -28,14 +28,19 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import net.minecraft.item.*;
 import net.minecraft.nbt.*;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.block.BlockState;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.*;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+//#if MC == 1.20.6
+//$$ import net.minecraft.component.type.*;
+//$$ import net.minecraft.component.DataComponentTypes;
+//#endif
 import fi.dy.masa.malilib.util.ItemType;
 import fi.dy.masa.litematica.materials.*;
 import fi.dy.masa.litematica.schematic.LitematicaSchematic;
@@ -74,6 +79,11 @@ public abstract class MaterialListUtilsMixin {
 
     @Unique
     private static final int MAX_RECURSIVE_DEPTH = 128;
+
+    //#if MC == 1.20.6
+    //$$ @Unique
+    //$$ private static final RegistryWrapper.WrapperLookup WRAPPER_LOOKUP = BuiltinRegistries.createWrapperLookup();
+    //#endif
 
     @Shadow
     private static void convertStatesToStacks(
@@ -121,7 +131,7 @@ public abstract class MaterialListUtilsMixin {
                             NbtList itemsList = teTag.getList("Items", TAG_COMPOUND);
                             for (int i = 0; i < itemsList.size(); ++i) {
                                 NbtCompound itemTag = itemsList.getCompound(i);
-                                ItemStack stack = ItemStack.fromNbt(itemTag);
+                                ItemStack stack = fromNbt(itemTag);
                                 if (!stack.isEmpty()) {
                                     processItemStackRecursively(stack, 0, itemTypesTotal, itemTypesMissing);
                                 }
@@ -177,11 +187,48 @@ public abstract class MaterialListUtilsMixin {
     }
 
     @Unique
+    private static NbtCompound getSubNbt(ItemStack stack, String key) {
+        //#if MC == 1.20.6
+        //$$ if ("BlockEntityTag".equals(key)) {
+        //$$     NbtComponent component = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        //$$     return component != null ? component.copyNbt() : null;
+        //$$ }
+        //$$ return null;
+        //#else
+        return stack.getSubNbt(key);
+        //#endif
+    }
+
+    @Unique
+    private static ItemStack fromNbt(NbtCompound tag) {
+        if (tag == null || !tag.contains("id", NbtElement.STRING_TYPE)) {
+            return ItemStack.EMPTY;
+        }
+
+        //#if MC == 1.20.6
+        //$$ return ItemStack.fromNbt(WRAPPER_LOOKUP, tag).orElse(ItemStack.EMPTY);
+        //#else
+        return ItemStack.fromNbt(tag);
+        //#endif
+    }
+
+    @Unique
+    private static void setCustomName(ItemStack stack, Text name) {
+        //#if MC == 1.20.6
+        //$$ stack.set(DataComponentTypes.CUSTOM_NAME, name);
+        //#else
+        stack.setCustomName(name);
+        //#endif
+    }
+
+    @Unique
     private static void processItemStackRecursively(
             ItemStack stack, int depth,
             Object2IntOpenHashMap<ItemType> totalMap,
             Object2IntOpenHashMap<ItemType> missingMap
     ) {
+        if (depth > MAX_RECURSIVE_DEPTH) return;
+
         if (stack.isEmpty()) return;
 
         // Current Item
@@ -191,18 +238,30 @@ public abstract class MaterialListUtilsMixin {
         totalMap.addTo(type, count);
         missingMap.addTo(type, count);
 
-        if (depth < MAX_RECURSIVE_DEPTH && isContainerItem(stack)) {
-            NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
+
+        if (isContainerItem(stack)) {
+            //#if MC == 1.20.6
+            //$$ ContainerComponent container = stack.get(DataComponentTypes.CONTAINER);
+            //$$ if (container != null) {
+            //$$     for (ItemStack innerStack : container.iterateNonEmpty()) {
+            //$$         if (!innerStack.isEmpty()) {
+            //$$             processItemStackRecursively(innerStack, depth + 1, totalMap, missingMap);
+            //$$         }
+            //$$     }
+            //$$ }
+            //#else
+            NbtCompound blockEntityTag = getSubNbt(stack, "BlockEntityTag");
             if (blockEntityTag != null && blockEntityTag.contains("Items", TAG_LIST)) {
                 NbtList itemsList = blockEntityTag.getList("Items", TAG_COMPOUND);
                 for (int i = 0; i < itemsList.size(); ++i) {
                     NbtCompound itemTag = itemsList.getCompound(i);
-                    ItemStack innerStack = ItemStack.fromNbt(itemTag);
+                    ItemStack innerStack = fromNbt(itemTag);
                     if (!innerStack.isEmpty()) {
                         processItemStackRecursively(innerStack, depth + 1, totalMap, missingMap);
                     }
                 }
             }
+            //#endif
         }
     }
 
@@ -212,10 +271,13 @@ public abstract class MaterialListUtilsMixin {
 
         if (!(stack.getItem() instanceof BlockItem)) return false;
 
-        NbtCompound tag = stack.getSubNbt("BlockEntityTag");
-        if (tag == null) return false;
+        //#if MC == 1.20.6
+        //$$ if (stack.get(DataComponentTypes.CONTAINER) != null) return true;
+        //#endif
 
-        return tag.contains("Items", TAG_LIST);
+        NbtCompound tag = getSubNbt(stack, "BlockEntityTag");
+
+        return tag != null && tag.contains("Items", TAG_LIST);
     }
 
     @Unique
@@ -240,7 +302,7 @@ public abstract class MaterialListUtilsMixin {
             NbtList itemsList = tag.getList("Items", TAG_COMPOUND);
             for (int i = 0; i < itemsList.size(); ++i) {
                 NbtCompound itemTag = itemsList.getCompound(i);
-                ItemStack stack = ItemStack.fromNbt(itemTag);
+                ItemStack stack = fromNbt(itemTag);
                 if (!stack.isEmpty()) {
                     processItemStackRecursively(stack, 0, totalMap, missingMap);
                 }
@@ -251,7 +313,7 @@ public abstract class MaterialListUtilsMixin {
         if (typeEntity != EntityType.ITEM) {
             if (tag.contains("Item", TAG_COMPOUND)) {
                 NbtCompound itemTag = tag.getCompound("Item");
-                ItemStack extraStack = ItemStack.fromNbt(itemTag);
+                ItemStack extraStack = fromNbt(itemTag);
                 if (!extraStack.isEmpty()) {
                     processItemStackRecursively(extraStack, 0, totalMap, missingMap);
                 }
@@ -263,7 +325,7 @@ public abstract class MaterialListUtilsMixin {
                 NbtList armorList = tag.getList("ArmorItems", TAG_COMPOUND);
                 for (int i = 0; i < armorList.size(); ++i) {
                     NbtCompound itemTag = armorList.getCompound(i);
-                    ItemStack stack = ItemStack.fromNbt(itemTag);
+                    ItemStack stack = fromNbt(itemTag);
                     if (!stack.isEmpty()) {
                         processItemStackRecursively(stack, 0, totalMap, missingMap);
                     }
@@ -273,7 +335,7 @@ public abstract class MaterialListUtilsMixin {
                 NbtList handList = tag.getList("HandItems", TAG_COMPOUND);
                 for (int i = 0; i < handList.size(); ++i) {
                     NbtCompound itemTag = handList.getCompound(i);
-                    ItemStack stack = ItemStack.fromNbt(itemTag);
+                    ItemStack stack = fromNbt(itemTag);
                     if (!stack.isEmpty()) {
                         processItemStackRecursively(stack, 0, totalMap, missingMap);
                     }
@@ -307,7 +369,7 @@ public abstract class MaterialListUtilsMixin {
         if (type == EntityType.ITEM) {
             NbtCompound itemTag = tag.getCompound("Item");
             if (itemTag != null && !itemTag.isEmpty()) {
-                ItemStack stack = ItemStack.fromNbt(itemTag);
+                ItemStack stack = fromNbt(itemTag);
                 if (!stack.isEmpty()) {
                     return stack;
                 }
@@ -329,7 +391,7 @@ public abstract class MaterialListUtilsMixin {
         Item specialEggItem = SPECIAL_EGG_OVERRIDES.get(type);
         if (specialEggItem != null) {
             ItemStack stack = new ItemStack(specialEggItem);
-            stack.setCustomName(type.getName());
+            setCustomName(stack, type.getName());
             return stack;
         }
 
@@ -337,7 +399,7 @@ public abstract class MaterialListUtilsMixin {
         if (egg != null) {
             ItemStack stack = new ItemStack(egg);
             // Localized name of the entity
-            stack.setCustomName(type.getName());
+            setCustomName(stack, type.getName());
             return stack;
         }
 
@@ -346,7 +408,7 @@ public abstract class MaterialListUtilsMixin {
         // And set its name to the entity's name
         if (type.isSummonable()) {
             ItemStack stack = new ItemStack(Items.CHICKEN_SPAWN_EGG);
-            stack.setCustomName(type.getName());
+            setCustomName(stack, type.getName());
             return stack;
         }
 
