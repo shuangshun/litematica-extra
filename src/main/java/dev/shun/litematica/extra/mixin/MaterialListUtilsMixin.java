@@ -37,7 +37,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-//#if MC == 1.20.6
+//#if MC >= 1.20.5
 //$$ import net.minecraft.component.type.*;
 //$$ import net.minecraft.component.DataComponentTypes;
 //#endif
@@ -80,7 +80,7 @@ public abstract class MaterialListUtilsMixin {
     @Unique
     private static final int MAX_RECURSIVE_DEPTH = 128;
 
-    //#if MC == 1.20.6
+    //#if MC >= 1.20.5
     //$$ @Unique
     //$$ private static final RegistryWrapper.WrapperLookup WRAPPER_LOOKUP = BuiltinRegistries.createWrapperLookup();
     //#endif
@@ -188,7 +188,7 @@ public abstract class MaterialListUtilsMixin {
 
     @Unique
     private static NbtCompound getSubNbt(ItemStack stack, String key) {
-        //#if MC == 1.20.6
+        //#if MC >= 1.20.5
         //$$ if ("BlockEntityTag".equals(key)) {
         //$$     NbtComponent component = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
         //$$     return component != null ? component.copyNbt() : null;
@@ -205,7 +205,7 @@ public abstract class MaterialListUtilsMixin {
             return ItemStack.EMPTY;
         }
 
-        //#if MC == 1.20.6
+        //#if MC >= 1.20.5
         //$$ return ItemStack.fromNbt(WRAPPER_LOOKUP, tag).orElse(ItemStack.EMPTY);
         //#else
         return ItemStack.fromNbt(tag);
@@ -214,7 +214,7 @@ public abstract class MaterialListUtilsMixin {
 
     @Unique
     private static void setCustomName(ItemStack stack, Text name) {
-        //#if MC == 1.20.6
+        //#if MC >= 1.20.5
         //$$ stack.set(DataComponentTypes.CUSTOM_NAME, name);
         //#else
         stack.setCustomName(name);
@@ -240,7 +240,7 @@ public abstract class MaterialListUtilsMixin {
 
 
         if (isContainerItem(stack)) {
-            //#if MC == 1.20.6
+            //#if MC >= 1.20.5
             //$$ ContainerComponent container = stack.get(DataComponentTypes.CONTAINER);
             //$$ if (container != null) {
             //$$     for (ItemStack innerStack : container.iterateNonEmpty()) {
@@ -271,7 +271,7 @@ public abstract class MaterialListUtilsMixin {
 
         if (!(stack.getItem() instanceof BlockItem)) return false;
 
-        //#if MC == 1.20.6
+        //#if MC >= 1.20.5
         //$$ if (stack.get(DataComponentTypes.CONTAINER) != null) return true;
         //#endif
 

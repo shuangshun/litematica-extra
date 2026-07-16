@@ -22,7 +22,9 @@ package dev.shun.litematica.extra;
 
 import net.minecraft.util.FixedBufferInputStream;
 
+import static fi.dy.masa.litematica.schematic.LitematicaSchematic.MINECRAFT_DATA_VERSION;
 import dev.shun.litematica.extra.nbt.*;
+import dev.shun.litematica.extra.util.Schema;
 import static dev.shun.litematica.extra.LitematicaExtra.LOGGER;
 
 import java.io.*;
@@ -32,6 +34,8 @@ import java.util.*;
 import java.util.zip.*;
 
 public class SchematicNativeReader {
+
+    private static final int TARGET_DATA_VERSION = Schema.SCHEMA_1_20_04.getDataVersion();
 
     public enum NativeOp {
         CONVERT_V7_TO_V6(1),
@@ -100,12 +104,12 @@ public class SchematicNativeReader {
                     : schematicData;
 
             Integer version = readVersion(rawNbt);
-            boolean needConvert = (version == null || version > 6);
+            boolean needConvert = (MINECRAFT_DATA_VERSION <= TARGET_DATA_VERSION)
+                    && (version == null || version > 6);
+
             boolean needErase = (fieldsToErase != null && !fieldsToErase.isEmpty());
 
-            if (!needConvert && !sort && !needErase) {
-                return rawNbt;
-            }
+            if (!needConvert && !sort && !needErase) return rawNbt;
 
             int bufferCapacity = needConvert
                     ? (int) (rawNbt.length * 1.2)

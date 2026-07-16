@@ -35,7 +35,7 @@ import fi.dy.masa.malilib.gui.widgets.WidgetFileBrowserBase.DirectoryEntry;
 import fi.dy.masa.litematica.gui.GuiSchematicBrowserBase;
 import fi.dy.masa.litematica.gui.widgets.WidgetSchematicBrowser;
 import fi.dy.masa.litematica.schematic.SchematicMetadata;
-import fi.dy.masa.litematica.schematic.LitematicaSchematic;
+import static fi.dy.masa.litematica.schematic.LitematicaSchematic.MINECRAFT_DATA_VERSION;
 import dev.shun.litematica.extra.util.Schema;
 import dev.shun.litematica.extra.api.ISchematicMetadata;
 
@@ -85,7 +85,7 @@ public abstract class WidgetSchematicBrowserMixin {
         Schema schema = Schema.getSchemaByDataVersion(dataVersion);
         if (schema != null) {
             String dataStr = StringUtils.translate("litematica-extra.gui.label.schematic_info.schema", schema.getString(), dataVersion);
-            if (dataVersion - LitematicaSchematic.MINECRAFT_DATA_VERSION > 100) {
+            if (dataVersion - MINECRAFT_DATA_VERSION > 100) {
                 dataStr = StringUtils.translate("litematica-extra.gui.label.schematic_info.schema.newer", schema.getString(), dataVersion);
             }
             this.parent.drawString(drawContext, dataStr, x, y, textColor);

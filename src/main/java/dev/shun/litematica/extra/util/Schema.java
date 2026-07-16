@@ -20,8 +20,11 @@
 
 package dev.shun.litematica.extra.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.google.common.collect.ImmutableList;
 
+// Form https://github.com/sakura-ryoko/malilib/tree/26.2/src/main/java/fi/dy/masa/malilib/util/data/Schema.java
 public enum Schema {
 
     // Minecraft Data Versions
@@ -170,6 +173,7 @@ public enum Schema {
 
     private final int schemaId;
     private final String str;
+    public static final ImmutableList<@NotNull Schema> VALUES = ImmutableList.copyOf(values());
 
     Schema(int id, String ver) {
         this.schemaId = id;
@@ -180,13 +184,22 @@ public enum Schema {
         return this.str;
     }
 
-    @Nullable
-    public static Schema getSchemaByDataVersion(int dataVersion) {
-        for (Schema schema : values()) {
-            if (schema.schemaId <= dataVersion) {
+    public int getDataVersion() {
+        return this.schemaId;
+    }
+
+    /**
+     * Returns the Schema of the closest dataVersion, or below it.
+     * @param dataVersion (Schema ID)
+     * @return (Schema | null)
+     */
+    public static @Nullable Schema getSchemaByDataVersion(int dataVersion) {
+        for (Schema schema : VALUES) {
+            if (schema.getDataVersion() <= dataVersion) {
                 return schema;
             }
         }
+
         return null;
     }
 }
