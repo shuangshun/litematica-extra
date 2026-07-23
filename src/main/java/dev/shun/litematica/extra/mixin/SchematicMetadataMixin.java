@@ -22,10 +22,7 @@ package dev.shun.litematica.extra.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 
-import net.minecraft.nbt.NbtCompound;
 import fi.dy.masa.litematica.schematic.SchematicMetadata;
 import dev.shun.litematica.extra.api.ISchematicMetadata;
 
@@ -51,15 +48,4 @@ public abstract class SchematicMetadataMixin implements ISchematicMetadata {
     @Override
     public void setFileType(String type) { this.fileType = type; }
 
-    // 在 writeToNBT 时保存版本信息（可选）
-    @ModifyReturnValue(method = "writeToNBT", at = @At("RETURN"), remap = false)
-    private NbtCompound onWriteToNBT(NbtCompound nbt) {
-        if (this.schematicVersion > 0) {
-            nbt.putInt("SchematicVersion", this.schematicVersion);
-        }
-        if (this.minecraftDataVersion > 0) {
-            nbt.putInt("MinecraftDataVersion", this.minecraftDataVersion);
-        }
-        return nbt;
-    }
 }
