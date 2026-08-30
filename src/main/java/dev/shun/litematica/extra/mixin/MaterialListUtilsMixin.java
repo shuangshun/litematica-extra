@@ -127,15 +127,8 @@ public abstract class MaterialListUtilsMixin {
                         // BlockEntities
                         BlockPos pos = new BlockPos(x, y, z);
                         NbtCompound teTag = tileEntities.get(pos);
-                        if (teTag != null && teTag.contains("Items", TAG_LIST)) {
-                            NbtList itemsList = teTag.getList("Items", TAG_COMPOUND);
-                            for (int i = 0; i < itemsList.size(); ++i) {
-                                NbtCompound itemTag = itemsList.getCompound(i);
-                                ItemStack stack = fromNbt(itemTag);
-                                if (!stack.isEmpty()) {
-                                    processItemStackRecursively(stack, 0, itemTypesTotal, itemTypesMissing);
-                                }
-                            }
+                        if (teTag != null) {
+                            addBlockEntityToMaps(teTag, itemTypesTotal, itemTypesMissing);
                         }
                     }
                 }
@@ -281,6 +274,53 @@ public abstract class MaterialListUtilsMixin {
     }
 
     @Unique
+    private static void addBlockEntityToMaps(NbtCompound tag,
+            Object2IntOpenHashMap<ItemType> totalMap,
+            Object2IntOpenHashMap<ItemType> missingMap
+    ) {
+        if (tag.contains("Items", TAG_LIST)) {
+            NbtList itemsList = tag.getList("Items", TAG_COMPOUND);
+            for (int i = 0; i < itemsList.size(); ++i) {
+                NbtCompound itemTag = itemsList.getCompound(i);
+                ItemStack stack = fromNbt(itemTag);
+                if (!stack.isEmpty()) {
+                    processItemStackRecursively(stack, 0, totalMap, missingMap);
+                }
+            }
+        }
+
+        if (tag.contains("Item", TAG_COMPOUND)) {
+            NbtCompound itemTag = tag.getCompound("Item");
+            ItemStack stack = fromNbt(itemTag);
+            if (!stack.isEmpty()) {
+                processItemStackRecursively(stack, 0, totalMap, missingMap);
+            }
+        } else if (tag.contains("item", TAG_COMPOUND)) { // fuck u bugjump
+            NbtCompound itemTag = tag.getCompound("item");
+            ItemStack stack = fromNbt(itemTag);
+            if (!stack.isEmpty()) {
+                processItemStackRecursively(stack, 0, totalMap, missingMap);
+            }
+        }
+
+        if (tag.contains("RecordItem", TAG_COMPOUND)) {
+            NbtCompound recordItem = tag.getCompound("RecordItem");
+            ItemStack stack = fromNbt(recordItem);
+            if (!stack.isEmpty()) {
+                processItemStackRecursively(stack, 0, totalMap, missingMap);
+            }
+        }
+
+        if (tag.contains("Book", TAG_COMPOUND)) {
+            NbtCompound book = tag.getCompound("Book");
+            ItemStack stack = fromNbt(book);
+            if (!stack.isEmpty()) {
+                processItemStackRecursively(stack, 0, totalMap, missingMap);
+            }
+        }
+    }
+
+    @Unique
     private static void addEntityItemsToMaps(NbtCompound tag,
             Object2IntOpenHashMap<ItemType> totalMap,
             Object2IntOpenHashMap<ItemType> missingMap,
@@ -313,9 +353,9 @@ public abstract class MaterialListUtilsMixin {
         if (typeEntity != EntityType.ITEM) {
             if (tag.contains("Item", TAG_COMPOUND)) {
                 NbtCompound itemTag = tag.getCompound("Item");
-                ItemStack extraStack = fromNbt(itemTag);
-                if (!extraStack.isEmpty()) {
-                    processItemStackRecursively(extraStack, 0, totalMap, missingMap);
+                ItemStack stack = fromNbt(itemTag);
+                if (!stack.isEmpty()) {
+                    processItemStackRecursively(stack, 0, totalMap, missingMap);
                 }
             }
         }
