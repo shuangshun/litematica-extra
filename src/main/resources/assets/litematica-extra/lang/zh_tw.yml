@@ -16,6 +16,7 @@ litematica-extra:
         schema:
           .: "我的世界：§f%s§r [資料版本 §f%d§r]"
           newer: "Minecraft: §c%s§r [Schema §c%d§r]"
+          convert: "游戏版本：§e%s§r [原理图版本：§e%d§r]"
 
         version: "Litematica 版本：§f%d§r"
         sponge_version: "Sponge 版本：§f%d§r"

@@ -84,10 +84,15 @@ public abstract class WidgetSchematicBrowserMixin {
 
         Schema schema = Schema.getSchemaByDataVersion(dataVersion);
         if (schema != null) {
-            String dataStr = StringUtils.translate("litematica-extra.gui.label.schematic_info.schema", schema.getString(), dataVersion);
+            String dataStrKey = "litematica-extra.gui.label.schematic_info.schema";
             if (dataVersion - MINECRAFT_DATA_VERSION > 100) {
-                dataStr = StringUtils.translate("litematica-extra.gui.label.schematic_info.schema.newer", schema.getString(), dataVersion);
+                if (version == 6) {
+                    dataStrKey = "litematica-extra.gui.label.schematic_info.schema.convert";
+                } else {
+                    dataStrKey = "litematica-extra.gui.label.schematic_info.schema.newer";
+                }
             }
+            String dataStr = StringUtils.translate(dataStrKey, schema.getString(), dataVersion);
             this.parent.drawString(drawContext, dataStr, x, y, textColor);
         }
     }

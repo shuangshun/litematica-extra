@@ -16,6 +16,7 @@ litematica-extra:
         schema:
           .: "마인크래프트: §f%s§r [스키마 §f%d§r]"
           newer: "마인크래프트: §c%s§r [스키마 §c%d§r]"
+          convert: "마인크래프트: §e%s§r [스키마 §e%d§r]"
 
         version: "라이트매틱 버전: §f%d§r"
         sponge_version: "Sponge 버전: §f%d§r"

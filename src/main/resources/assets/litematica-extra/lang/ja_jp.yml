@@ -16,6 +16,7 @@ litematica-extra:
         schema:
           .: "Minecraft: §f%s§r [スキーマ §f%d§r]"
           newer: "Minecraft: §c%s§r [スキーマ §c%d§r]"
+          convert: "Minecraft: §e%s§r [スキーマ §e%d§r]"
 
         version: "Litematicバージョン: §f%d§r"
         sponge_version: "Spongeバージョン: §f%d§r"

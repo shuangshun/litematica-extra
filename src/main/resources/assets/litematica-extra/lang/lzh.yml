@@ -16,6 +16,7 @@ litematica-extra:
         schema:
           .: "礦藝：§f%s§r [蜃圖 §f%d§r]"
           newer: "礦藝：§c%s§r [蜃圖 §c%d§r]"
+          convert: "礦藝：§e%s§r [蜃圖 §e%d§r]"
 
         version: "「清影」之版：§f%d§r"
         sponge_version: "海綿端版：§f%d§r"
