@@ -1,7 +1,8 @@
 # Litematica Extra
 
 [![GitHub Releases](https://shields.io/github/v/release/shuangshun/litematica-extra)](https://github.com/shuangshun/litematica-extra/releases)
-[![GitHub Releases downloads](https://shields.io/github/downloads/shuangshun/litematica-extra/total)](https://github.com/shuangshun/litematica-extra/releases)
+[![GitHub Releases downloads](https://shields.io/github/downloads/shuangshun/litematica-extra/total?logo=github)](https://github.com/shuangshun/litematica-extra/releases)
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/7TGJ7mub?logo=modrinth)](https://modrinth.com/mod/litematica-extra)
 [![GitHub Repo stars](https://shields.io/github/stars/shuangshun/litematica-extra)](https://github.com/shuangshun/litematica-extra)
 
 A Litematica extension that adds various fixes, backports, and features for versions below 1.21
